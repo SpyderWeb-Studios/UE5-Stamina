@@ -19,42 +19,55 @@ void UStaminaComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if(GetOwner()->HasAuthority())
+	{
+		StaminaDecayDelegate.BindUFunction(this, "StaminaDecay");
+		StaminaRegenDelegate.BindUFunction(this, "StaminaRegenerate");
 
-
-	StaminaDecayDelegate.BindUFunction(this, "StaminaDecay");
-	StaminaRegenDelegate.BindUFunction(this, "StaminaRegenerate");
-
-	GetWorld()->GetTimerManager().SetTimer(StaminaDecayHandle, StaminaDecayDelegate, StaminaDecayRate, true);
-	GetWorld()->GetTimerManager().SetTimer(StaminaRegenHandle, StaminaRegenDelegate, StaminaRegenRate, true);
+		GetWorld()->GetTimerManager().SetTimer(StaminaDecayHandle, StaminaDecayDelegate, StaminaDecayRate, true);
+		GetWorld()->GetTimerManager().SetTimer(StaminaRegenHandle, StaminaRegenDelegate, StaminaRegenRate, true);
+	}
 	// ...
 	
 }
 
 void UStaminaComponent::StaminaDecay()
 {
-	if (UCommonFunctionLibrary::Decay(Stamina, StaminaDecayStep, 0, bIsEnabled)) {
-		ToggleStamina(false);
+	if(GetOwner()->HasAuthority())
+	{
+		if (UCommonFunctionLibrary::Decay(Stamina, StaminaDecayStep, 0, bIsEnabled))
+		{
+			ToggleStamina(false);
+		}
+		
+		UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Stamina Decayed; " + FString::SanitizeFloat(Stamina), EDebugType::DT_Log, 5.0f);
 	}
-	// UDebugFunctionLibrary::DebugLog("Stamina: " + FString::SanitizeFloat(Stamina), EDebugType::DT_Log, 5.0f);
 }
 
 void UStaminaComponent::StaminaRegenerate()
 {
-	UCommonFunctionLibrary::Regenerate(Stamina, StaminaRegenStep, MaxStamina, !bIsEnabled);
+	if(GetOwner()->HasAuthority())
+	{
+		UCommonFunctionLibrary::Regenerate(Stamina, StaminaRegenStep, MaxStamina, !bIsEnabled);
+		UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Stamina Regenerated; " + FString::SanitizeFloat(Stamina), EDebugType::DT_Log, 5.0f);
+	}
 }
 
 
 void UStaminaComponent::ToggleStamina(bool bEnableStamina)
 {
-	bIsEnabled = bEnableStamina;
+	if(GetOwner()->HasAuthority())
+	{
+		bIsEnabled = bEnableStamina;
 
-	if (bIsEnabled && Stamina > 0) {
-		// UDebugFunctionLibrary::DebugLog("Stamina Enabled", EDebugType::DT_Log, 5.0f);
-		if(CharacterMovementComponent) CharacterMovementComponent->MaxWalkSpeed = 900;
-	}
-	else {
-		// UDebugFunctionLibrary::DebugLog("Stamina Disabled", EDebugType::DT_Log, 5.0f);
-		if (CharacterMovementComponent) CharacterMovementComponent->MaxWalkSpeed = 400;
+		if (bIsEnabled && Stamina > 0) {
+			// UDebugFunctionLibrary::DebugLog("Stamina Enabled", EDebugType::DT_Log, 5.0f);
+			if(CharacterMovementComponent.IsValid()) CharacterMovementComponent.Get()->MaxWalkSpeed = 900;
+		}
+		else {
+			// UDebugFunctionLibrary::DebugLog("Stamina Disabled", EDebugType::DT_Log, 5.0f);
+			if (CharacterMovementComponent.IsValid()) CharacterMovementComponent.Get()->MaxWalkSpeed = 400;
+		}
 	}
 }
 
@@ -62,4 +75,22 @@ void UStaminaComponent::ToggleStamina(bool bEnableStamina)
 void UStaminaComponent::SetCharacterMovementReference(UCharacterMovementComponent* MovementComponent)
 {
 	CharacterMovementComponent = MovementComponent;
+}
+
+void UStaminaComponent::OnRep_Stamina()
+{
+	UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Stamina Replicated; " +FString::SanitizeFloat(Stamina), EDebugType::DT_Log, 5.0f);
+}
+
+void UStaminaComponent::OnRep_MaxStamina()
+{
+	UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Max Stamina Replicated; " + FString::SanitizeFloat(MaxStamina), EDebugType::DT_Log, 5.0f);
+}
+
+void UStaminaComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UStaminaComponent, Stamina);
+	DOREPLIFETIME(UStaminaComponent, MaxStamina);
 }

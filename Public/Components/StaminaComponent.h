@@ -6,8 +6,12 @@
 #include "Components/ActorComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInput/Public/InputActionValue.h"
-#include <Helper/Public/FunctionLibrary/CommonFunctionLibrary.h>
-#include <Helper/Public/FunctionLibrary/DebugFunctionLibrary.h>
+#include "Net/UnrealNetwork.h"
+
+#include "FunctionLibrary/CommonFunctionLibrary.h"
+#include "FunctionLibrary/DebugFunctionLibrary.h"
+
+
 
 #include "InputActionValue.h"
 #include "StaminaComponent.generated.h"
@@ -17,7 +21,7 @@
 * control when the Character can Sprint and when they have ran out of stamina and must come to a halt
 * 
 */
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Stamina), meta=(BlueprintSpawnableComponent) )
 class STAMINA_API UStaminaComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -33,23 +37,31 @@ protected:
 public:	
 	// Called every frame
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable)
 		void ToggleStamina(bool bEnableStamina);
+	
 
-		
-
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable)
 		void SetCharacterMovementReference(UCharacterMovementComponent* MovementComponent);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		float GetCurrentStamina() { return Stamina; }
 
+	UFUNCTION()
+		void OnRep_Stamina();
+
+	UFUNCTION()
+		void OnRep_MaxStamina();
+
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, ReplicatedUsing=OnRep_Stamina, Category="Stamina|Base")
 		float Stamina = 100;
 
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, ReplicatedUsing=OnRep_MaxStamina, Category="Stamina|Base")
 		float MaxStamina = 100;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
@@ -79,7 +91,8 @@ private:
 	FTimerHandle StaminaRegenHandle;
 
 	bool bIsEnabled;
-		
 
-	UCharacterMovementComponent* CharacterMovementComponent;
+	TWeakObjectPtr<UCharacterMovementComponent> CharacterMovementComponent;
+
+	// UCharacterMovementComponent* CharacterMovementComponent;
 };
