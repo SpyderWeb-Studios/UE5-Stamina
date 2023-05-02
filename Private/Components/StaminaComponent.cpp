@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2022-2023 Spyderweb Studios Ltd. All Rights Reserved.
 
 
 #include "Components/StaminaComponent.h"
@@ -46,6 +46,7 @@ void UStaminaComponent::StaminaDecay()
 		}
 		
 		UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Stamina Decayed; " + FString::SanitizeFloat(Stamina), EDebugType::DT_Log, 5.0f);
+		OnRep_Stamina();
 	}
 }
 
@@ -55,6 +56,7 @@ void UStaminaComponent::StaminaRegenerate()
 	{
 		UCommonFunctionLibrary::Regenerate(Stamina, StaminaRegenStep, MaxStamina, !bIsEnabled);
 		UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Stamina Regenerated; " + FString::SanitizeFloat(Stamina), EDebugType::DT_Log, 5.0f);
+		OnRep_Stamina();
 	}
 }
 
@@ -83,11 +85,15 @@ void UStaminaComponent::SetCharacterMovementReference(UCharacterMovementComponen
 void UStaminaComponent::OnRep_Stamina()
 {
 	UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Stamina Replicated; " +FString::SanitizeFloat(Stamina), EDebugType::DT_Log, 5.0f);
+
+	OnStaminaValueUpdated.Broadcast(Stamina);
 }
 
 void UStaminaComponent::OnRep_MaxStamina()
 {
 	UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Max Stamina Replicated; " + FString::SanitizeFloat(MaxStamina), EDebugType::DT_Log, 5.0f);
+
+	OnMaxStaminaValueUpdated.Broadcast(MaxStamina);
 }
 
 void UStaminaComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

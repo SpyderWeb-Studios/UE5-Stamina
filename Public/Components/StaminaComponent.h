@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2022-2023 Spyderweb Studios Ltd. All Rights Reserved.
 
 #pragma once
 
@@ -8,10 +8,10 @@
 #include "EnhancedInput/Public/InputActionValue.h"
 #include "Net/UnrealNetwork.h"
 
+#include "Engine/EngineTypes.h"
+#include "TimerManager.h"
 #include "FunctionLibrary/CommonFunctionLibrary.h"
 #include "FunctionLibrary/DebugFunctionLibrary.h"
-
-
 
 #include "InputActionValue.h"
 #include "StaminaComponent.generated.h"
@@ -29,6 +29,9 @@ class STAMINA_API UStaminaComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UStaminaComponent();
+
+	DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FOnStaminaValueUpdated, UStaminaComponent, OnStaminaValueUpdated, float, NewStaminaValue);
+	DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FOnMaxStaminaValueUpdated, UStaminaComponent, OnMaxStaminaValueUpdated, float, NewMaxStaminaValue);
 
 protected:
 	// Called when the game starts
@@ -56,12 +59,20 @@ public:
 	UFUNCTION(BlueprintPure, Category="Stamina|Base")
 		float GetCurrentStamina() { return Stamina; }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Stamina|Base")
+		float GetCurrentMaxStamina() { return MaxStamina; }
+
 	UFUNCTION()
 		void OnRep_Stamina();
 
 	UFUNCTION()
 		void OnRep_MaxStamina();
 
+	UPROPERTY(BlueprintAssignable, Category="Stamina|Events")
+	FOnStaminaValueUpdated OnStaminaValueUpdated;
+
+	UPROPERTY(BlueprintAssignable, Category="Stamina|Events")
+	FOnMaxStaminaValueUpdated OnMaxStaminaValueUpdated;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
