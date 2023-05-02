@@ -31,6 +31,11 @@ void UStaminaComponent::BeginPlay()
 	
 }
 
+void UStaminaComponent::Server_ToggleStaminaActive_Implementation(bool bEnableStamina)
+{
+	ToggleStamina(bEnableStamina);
+}
+
 void UStaminaComponent::StaminaDecay()
 {
 	if(GetOwner()->HasAuthority())
@@ -61,11 +66,9 @@ void UStaminaComponent::ToggleStamina(bool bEnableStamina)
 		bIsEnabled = bEnableStamina;
 
 		if (bIsEnabled && Stamina > 0) {
-			// UDebugFunctionLibrary::DebugLog("Stamina Enabled", EDebugType::DT_Log, 5.0f);
 			if(CharacterMovementComponent.IsValid()) CharacterMovementComponent.Get()->MaxWalkSpeed = 900;
 		}
 		else {
-			// UDebugFunctionLibrary::DebugLog("Stamina Disabled", EDebugType::DT_Log, 5.0f);
 			if (CharacterMovementComponent.IsValid()) CharacterMovementComponent.Get()->MaxWalkSpeed = 400;
 		}
 	}

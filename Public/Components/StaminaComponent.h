@@ -34,17 +34,26 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
+public:
+	/**
+	 * @brief RPC to toggle stamina on the Server
+	 * @param bEnableStamina If the client is requesting the stamina to be enabled or disabled
+	 */
+	UFUNCTION(Server, Unreliable, BlueprintCallable, Category="Stamina|Toggle")
+		void Server_ToggleStaminaActive(bool bEnableStamina);
 
-	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable)
+	/**
+	 * @brief Server Only Function to toggle stamina on the Server. Should be used over the RPC equivalent when possible.
+	 * @param bEnableStamina If the client is requesting the stamina to be enabled or disabled
+	 */
+	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, Category="Stamina|Toggle")
 		void ToggleStamina(bool bEnableStamina);
 	
 
-	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable)
+	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, Category="Stamina|Base")
 		void SetCharacterMovementReference(UCharacterMovementComponent* MovementComponent);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintPure, Category="Stamina|Base")
 		float GetCurrentStamina() { return Stamina; }
 
 	UFUNCTION()
@@ -64,16 +73,16 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, ReplicatedUsing=OnRep_MaxStamina, Category="Stamina|Base")
 		float MaxStamina = 100;
 
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Stamina|Decay")
 		float StaminaDecayRate = 1;
 
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Stamina|Decay")
 		float StaminaDecayStep = 1;
 
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Stamina|Regenerate")
 		float StaminaRegenRate = 1;
 
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Stamina|Regenerate")
 		float StaminaRegenStep = 1;
 
 	UFUNCTION()
