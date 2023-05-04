@@ -6,80 +6,7 @@
 // Sets default values for this component's properties
 UStaminaComponent::UStaminaComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
-}
-
-
-// Called when the game starts
-void UStaminaComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if(GetOwner()->HasAuthority())
-	{
-		StaminaDecayDelegate.BindUFunction(this, "StaminaDecay");
-		StaminaRegenDelegate.BindUFunction(this, "StaminaRegenerate");
-
-		GetWorld()->GetTimerManager().SetTimer(StaminaDecayHandle, StaminaDecayDelegate, StaminaDecayRate, true);
-		GetWorld()->GetTimerManager().SetTimer(StaminaRegenHandle, StaminaRegenDelegate, StaminaRegenRate, true);
-	}
-	// ...
-	
-}
-
-void UStaminaComponent::Server_ToggleStaminaActive_Implementation(bool bEnableStamina)
-{
-	ToggleStamina(bEnableStamina);
-}
-
-void UStaminaComponent::StaminaDecay()
-{
-	if(GetOwner()->HasAuthority())
-	{
-		if (UCommonFunctionLibrary::Decay(Stamina, StaminaDecayStep, 0, bIsEnabled))
-		{
-			ToggleStamina(false);
-		}
-		
-		UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Stamina Decayed; " + FString::SanitizeFloat(Stamina), EDebugType::DT_Log, 5.0f);
-		OnRep_Stamina();
-	}
-}
-
-void UStaminaComponent::StaminaRegenerate()
-{
-	if(GetOwner()->HasAuthority())
-	{
-		UCommonFunctionLibrary::Regenerate(Stamina, StaminaRegenStep, MaxStamina, !bIsEnabled);
-		UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Stamina Regenerated; " + FString::SanitizeFloat(Stamina), EDebugType::DT_Log, 5.0f);
-		OnRep_Stamina();
-	}
-}
-
-
-void UStaminaComponent::ToggleStamina(bool bEnableStamina)
-{
-	if(GetOwner()->HasAuthority())
-	{
-		bIsEnabled = bEnableStamina;
-
-		if (bIsEnabled && Stamina > 0) {
-			if(CharacterMovementComponent.IsValid()) CharacterMovementComponent.Get()->MaxWalkSpeed = 900;
-		}
-		else {
-			if (CharacterMovementComponent.IsValid()) CharacterMovementComponent.Get()->MaxWalkSpeed = 400;
-		}
-	}
-}
-
-
-void UStaminaComponent::SetCharacterMovementReference(UCharacterMovementComponent* MovementComponent)
-{
-	CharacterMovementComponent = MovementComponent;
+	SetIsReplicatedByDefault(true);
 }
 
 void UStaminaComponent::OnRep_Stamina()
@@ -96,10 +23,39 @@ void UStaminaComponent::OnRep_MaxStamina()
 	OnMaxStaminaValueUpdated.Broadcast(MaxStamina);
 }
 
+void UStaminaComponent::ToggleStamina(bool bEnableStamina)
+{
+	bIsEnabled = bEnableStamina;
+	OnStaminaEnabled.Broadcast(bIsEnabled);
+}
+
+bool UStaminaComponent::RegenerateStamina(float DeltaStamina)
+{
+	if(GetOwner()->HasAuthority())
+	{
+		const bool bResult = UCommonFunctionLibrary::Regenerate(Stamina, DeltaStamina, MaxStamina, !bIsEnabled);
+		OnRep_Stamina();
+		return bResult;
+	}
+	return false;
+}
+
+bool UStaminaComponent::ConsumeStamina(float DeltaStamina)
+{
+	if(GetOwner()->HasAuthority())
+	{
+		const bool bResult = UCommonFunctionLibrary::Decay(Stamina, DeltaStamina, 0, bIsEnabled);
+		OnRep_Stamina();
+		return bResult;
+	}
+	return false;
+}
+
 void UStaminaComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UStaminaComponent, Stamina);
 	DOREPLIFETIME(UStaminaComponent, MaxStamina);
+	DOREPLIFETIME(UStaminaComponent, bIsEnabled);
 }

@@ -5,12 +5,12 @@
 
 void UStaminaWidget::OnStaminaValueChanged_Implementation(float NewStaminaValue)
 {
-	UDebugFunctionLibrary::DebugLogWithObject(this, FString::Printf(TEXT("Stamina Value Changed: %f"), NewStaminaValue), EDebugType::DT_Log);
+	// UDebugFunctionLibrary::DebugLogWithObject(this, FString::Printf(TEXT("Stamina Value Changed: %f"), NewStaminaValue), EDebugType::DT_Log);
 }
 
 void UStaminaWidget::OnMaxStaminaValueChanged_Implementation(float NewMaxStaminaValue)
 {
-	UDebugFunctionLibrary::DebugLogWithObject(this, FString::Printf(TEXT("Max Stamina Value Changed: %f"), NewMaxStaminaValue), EDebugType::DT_Log);
+	// UDebugFunctionLibrary::DebugLogWithObject(this, FString::Printf(TEXT("Max Stamina Value Changed: %f"), NewMaxStaminaValue), EDebugType::DT_Log);
 }
 
 void UStaminaWidget::SetStaminaComponent(UStaminaComponent* AttachedStaminaComponent)
