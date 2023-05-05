@@ -59,7 +59,7 @@ public:
 	UFUNCTION()
 		void OnRep_MaxStamina();
 
-	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, Category="Sprint|Base")
+	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, Category="Stamina|Base")
 	void ToggleStamina(bool bEnableStamina);
 
 	/**
@@ -67,7 +67,7 @@ public:
 	 * @param DeltaStamina The Amount of Stamina to Regenerate
 	 * @return True if the Stamina is at Max Stamina, False if it is not
 	 */
-	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, Category="Sprint|Base")
+	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, Category="Stamina|Base")
 	bool RegenerateStamina(float DeltaStamina);
 
 	/**
@@ -75,7 +75,7 @@ public:
 	 * @param DeltaStamina The Amount of Stamina to Consume
 	 * @return True if the Stamina is at 0 Stamina, False if it is not
 	 */
-	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, Category="Sprint|Base")
+	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, Category="Stamina|Base")
 	bool ConsumeStamina(float DeltaStamina);
 
 	/**

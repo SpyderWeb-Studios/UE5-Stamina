@@ -28,14 +28,14 @@ public:
 	 * @brief RPC to toggle stamina on the Server
 	 * @param bEnableSprint If the client is requesting the stamina to be enabled or disabled
 	 */
-	UFUNCTION(Server, Unreliable, BlueprintCallable, Category="Stamina|Toggle")
+	UFUNCTION(Server, Unreliable, BlueprintCallable, Category="Sprint|Toggle")
 		void Server_ToggleSprintActive(bool bEnableSprint);
 
 	/**
 	 * @brief Server Only Function to toggle stamina on the Server. Should be used over the RPC equivalent when possible.
 	 * @param bEnableSprint If the client is requesting the stamina to be enabled or disabled
 	 */
-	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, Category="Stamina|Toggle")
+	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, Category="Sprint|Toggle")
 		void ToggleSprint(bool bEnableSprint);
 
 	/**
@@ -95,25 +95,25 @@ protected:
 	/**
 	 * @brief The rate at which the stamina will decay when sprinting
 	 */
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Stamina|Decay")
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sprint|Decay")
 	float StaminaDecayRate = 1;
 
 	/**
 	 * @brief The amount that the stamina will decay by when sprinting
 	 */
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Stamina|Decay")
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sprint|Decay")
 	float StaminaDecayStep = 1;
 
 	/**
 	 * @brief The rate at which the stamina will regenerate when not sprinting
 	 */
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Stamina|Regenerate")
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sprint|Regenerate")
 	float StaminaRegenRate = 1;
 
 	/**
 	 * @brief The amount that the stamina will regenerate by when not sprinting
 	 */
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Stamina|Regenerate")
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Sprint|Regenerate")
 	float StaminaRegenStep = 1;
 
 	/**
