@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2022-2023 Spyderweb Studios Ltd. All Rights Reserved.
 
 
 #include "Components/StaminaComponent.h"
@@ -6,60 +6,100 @@
 // Sets default values for this component's properties
 UStaminaComponent::UStaminaComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+	SetIsReplicatedByDefault(true);
 }
 
-
-// Called when the game starts
-void UStaminaComponent::BeginPlay()
+void UStaminaComponent::OnRep_Stamina()
 {
-	Super::BeginPlay();
+	UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Stamina Replicated; " +FString::SanitizeFloat(Stamina), EDebugType::DT_Log, 5.0f);
 
-
-
-	StaminaDecayDelegate.BindUFunction(this, "StaminaDecay");
-	StaminaRegenDelegate.BindUFunction(this, "StaminaRegenerate");
-
-	GetWorld()->GetTimerManager().SetTimer(StaminaDecayHandle, StaminaDecayDelegate, StaminaDecayRate, true);
-	GetWorld()->GetTimerManager().SetTimer(StaminaRegenHandle, StaminaRegenDelegate, StaminaRegenRate, true);
-	// ...
-	
+	OnStaminaValueUpdated.Broadcast(Stamina);
 }
 
-void UStaminaComponent::StaminaDecay()
+void UStaminaComponent::OnRep_MaxStamina()
 {
-	if (UCommonFunctionLibrary::Decay(Stamina, StaminaDecayStep, 0, bIsEnabled)) {
-		ToggleStamina(false);
-	}
-	// UDebugFunctionLibrary::DebugLog("Stamina: " + FString::SanitizeFloat(Stamina), EDebugType::DT_Log, 5.0f);
-}
+	UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Max Stamina Replicated; " + FString::SanitizeFloat(MaxStamina), EDebugType::DT_Log, 5.0f);
 
-void UStaminaComponent::StaminaRegenerate()
-{
-	UCommonFunctionLibrary::Regenerate(Stamina, StaminaRegenStep, MaxStamina, !bIsEnabled);
+	OnMaxStaminaValueUpdated.Broadcast(MaxStamina);
 }
-
 
 void UStaminaComponent::ToggleStamina(bool bEnableStamina)
 {
 	bIsEnabled = bEnableStamina;
+	OnStaminaEnabled.Broadcast(bIsEnabled);
+}
 
-	if (bIsEnabled && Stamina > 0) {
-		// UDebugFunctionLibrary::DebugLog("Stamina Enabled", EDebugType::DT_Log, 5.0f);
-		if(CharacterMovementComponent) CharacterMovementComponent->MaxWalkSpeed = 900;
+bool UStaminaComponent::RegenerateStamina(float DeltaStamina)
+{
+	if(GetOwner()->HasAuthority())
+	{
+		const bool bResult = UCommonFunctionLibrary::Regenerate(Stamina, DeltaStamina, MaxStamina, !bIsEnabled);
+		OnRep_Stamina();
+		return bResult;
 	}
-	else {
-		// UDebugFunctionLibrary::DebugLog("Stamina Disabled", EDebugType::DT_Log, 5.0f);
-		if (CharacterMovementComponent) CharacterMovementComponent->MaxWalkSpeed = 400;
+	return false;
+}
+
+bool UStaminaComponent::ConsumeStamina(float DeltaStamina)
+{
+	if(GetOwner()->HasAuthority())
+	{
+		const bool bResult = UCommonFunctionLibrary::Decay(Stamina, DeltaStamina, 0, bIsEnabled);
+		OnRep_Stamina();
+		return bResult;
+	}
+	return false;
+}
+
+void UStaminaComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UStaminaComponent, Stamina);
+	DOREPLIFETIME(UStaminaComponent, MaxStamina);
+	DOREPLIFETIME(UStaminaComponent, bIsEnabled);
+	
+}
+
+void UStaminaComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	if(GetOwner()->HasAuthority()){
+		StaminaRegenDelegate.BindUObject(this, &UStaminaComponent::StaminaRegenerate);
+			
+		GetWorld()->GetTimerManager().SetTimer(StaminaRegenHandle, StaminaRegenDelegate, StaminaRegenRate, true);
 	}
 }
 
-
-void UStaminaComponent::SetCharacterMovementReference(UCharacterMovementComponent* MovementComponent)
+void UStaminaComponent::StaminaRegenerate()
 {
-	CharacterMovementComponent = MovementComponent;
+	if(GetOwner()->HasAuthority() && !bIsEnabled)
+	{
+		UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Regenerating Stamina");
+		if(RegenerateStamina(StaminaRegenStep))
+		{
+			UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Stamina Fully Regenerated");
+		}
+	}
+}
+
+void UStaminaComponent::SetRegenVariables(const float& DecayRate, const float& DecayStep)
+{
+	// Make sure we are on the server
+	if(!GetOwner()->HasAuthority())
+	{
+		UDebugFunctionLibrary::DebugLogWithObjectContext(this, "SetRegenVariables called on client");
+		return;
+	}
+	
+	// Clear the Timer
+	GetWorld()->GetTimerManager().ClearTimer(StaminaRegenHandle);
+	StaminaRegenHandle.Invalidate();
+
+	// Set the new values
+	StaminaRegenRate = DecayRate;
+	StaminaRegenStep = DecayStep;
+
+	// Restart the Timer
+	GetWorld()->GetTimerManager().SetTimer(StaminaRegenHandle, StaminaRegenDelegate, StaminaRegenRate, true);
 }
