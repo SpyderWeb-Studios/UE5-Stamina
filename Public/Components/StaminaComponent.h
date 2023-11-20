@@ -8,8 +8,6 @@
 
 #include "Engine/EngineTypes.h"
 #include "TimerManager.h"
-#include "FunctionLibrary/CommonFunctionLibrary.h"
-#include "FunctionLibrary/DebugFunctionLibrary.h"
 
 #include "StaminaComponent.generated.h"
 
