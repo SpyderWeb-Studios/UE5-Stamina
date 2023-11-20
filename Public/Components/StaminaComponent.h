@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
 #include "Engine/EngineTypes.h"
@@ -13,6 +12,8 @@
 #include "FunctionLibrary/DebugFunctionLibrary.h"
 
 #include "StaminaComponent.generated.h"
+
+class UCharacterMovementComponent;
 
 /*
 * @brief The Stamina Component is used to manage the Stamina of a Character, and to allow the Character to perform actions based on their Stamina
