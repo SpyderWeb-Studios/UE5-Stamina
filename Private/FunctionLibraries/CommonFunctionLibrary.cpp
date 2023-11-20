@@ -1,6 +1,6 @@
 
 
-#include "FunctionLibrary/CommonFunctionLibrary.h"
+#include "FunctionLibraries/CommonFunctionLibrary.h"
 
 bool UCommonFunctionLibrary::Regenerate(UPARAM(ref) float& Variable, float regenAmount, float maxAmount,  const bool& canRegen) 
 {
