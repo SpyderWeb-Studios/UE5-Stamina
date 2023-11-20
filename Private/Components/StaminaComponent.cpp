@@ -2,6 +2,7 @@
 
 
 #include "Components/StaminaComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values for this component's properties
 UStaminaComponent::UStaminaComponent()
