@@ -15,7 +15,7 @@ class UCharacterMovementComponent;
  * interfaces with the StaminaComponent to handle the stamina decay and regeneration. This component should be added to the
  * same actor as the CharacterMovementComponent and the StaminaComponent.
  */
-UCLASS( ClassGroup=(Stamina), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, BlueprintType, ClassGroup=(Stamina), meta=(BlueprintSpawnableComponent) )
 class STAMINA_API USprintComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -111,6 +111,9 @@ protected:
 	 * @brief A Weak Pointer to the StaminaComponent that this component is attached to
 	 */
 	TWeakObjectPtr<UStaminaComponent> StaminaComponent;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintPure)
+	bool CanDecayStamina() const;
 	
 private:
 

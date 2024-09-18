@@ -79,11 +79,11 @@ bool UStaminaComponent::RegenerateStamina(float DeltaStamina)
 	{
 		UE_LOG(LogStamina, VeryVerbose, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "Stamina is being Regenerated"));
 		
-		if (!bIsEnabled)
+		if (CanRegenerateStamina())
 		{
 			Stamina = FMath::Clamp(Stamina + DeltaStamina, 0, MaxStamina);
 		}
-		UE_LOG(LogTemp, Verbose, TEXT("Regenerated to [%f]"), Stamina);
+		UE_LOG(LogStamina, Verbose, TEXT("Regenerated to [%f]"), Stamina);
 		const bool bResult = Stamina >= MaxStamina;
 		
 		UE_LOG(LogStamina, Verbose, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "Stamina [%f] Regeneration Result: %d", Stamina, bResult));
@@ -100,7 +100,7 @@ bool UStaminaComponent::ConsumeStamina(float DeltaStamina)
 	{
 		UE_LOG(LogStamina, Verbose, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "Stamina is being Consumed"));
 
-		if (bIsEnabled)
+		if (CanConsumeStamina())
 		{
 			Stamina = FMath::Clamp(Stamina - DeltaStamina, 0, Stamina);
 		}

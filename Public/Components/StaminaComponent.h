@@ -13,12 +13,12 @@
 
 class UCharacterMovementComponent;
 
-DECLARE_LOG_CATEGORY_EXTERN(LogStamina, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogStamina, Verbose, All);
 
 /*
 * @brief The Stamina Component is used to manage the Stamina of a Character, and to allow the Character to perform actions based on their Stamina
 */
-UCLASS( ClassGroup=(Stamina), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, BlueprintType, ClassGroup=(Stamina), meta=(BlueprintSpawnableComponent) )
 class STAMINA_API UStaminaComponent : public UActorComponent
 {
 	GENERATED_BODY()

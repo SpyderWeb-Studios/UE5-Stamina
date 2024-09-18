@@ -117,7 +117,7 @@ void USprintComponent::SprintStaminaDecay()
 {
 	// If the Owner has authority and sprint is enabled and the stamina component is valid
 	// Decay the stamina
-	if(GetOwner()->HasAuthority() && bSprintEnabled && GetStaminaComponent().IsValid())
+	if(GetOwner()->HasAuthority() && bSprintEnabled && GetStaminaComponent().IsValid() && CanDecayStamina())
 	{
 		if(GetStaminaComponent()->ConsumeStamina(StaminaDecayStep))
 		{
@@ -145,5 +145,10 @@ void USprintComponent::SetDecayVariables(const float& DecayRate, const float& De
 
 	// Restart the Timer
 	GetWorld()->GetTimerManager().SetTimer(StaminaDecayHandle, StaminaDecayDelegate, StaminaDecayRate, true);
+}
+
+bool USprintComponent::CanDecayStamina_Implementation() const
+{
+	return true;
 }
 
