@@ -3,25 +3,27 @@
 
 #include "Components/StaminaWidget.h"
 
+#include "Macros.h"
+
 void UStaminaWidget::OnStaminaValueChanged_Implementation(float NewStaminaValue)
 {
-	// UDebugFunctionLibrary::DebugLogWithObject(this, FString::Printf(TEXT("Stamina Value Changed: %f"), NewStaminaValue), EDebugType::DT_Log);
+	UE_LOG(LogStamina, Log, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "Stamina Value Changed [%f]"), NewStaminaValue);
 }
 
 void UStaminaWidget::OnMaxStaminaValueChanged_Implementation(float NewMaxStaminaValue)
 {
-	// UDebugFunctionLibrary::DebugLogWithObject(this, FString::Printf(TEXT("Max Stamina Value Changed: %f"), NewMaxStaminaValue), EDebugType::DT_Log);
+	UE_LOG(LogStamina, Log, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "Max Stamina Value Changed [%f]"), NewMaxStaminaValue);
 }
 
 void UStaminaWidget::SetStaminaComponent(UStaminaComponent* AttachedStaminaComponent)
 {
 	StaminaComponent = AttachedStaminaComponent;
 
-	UDebugFunctionLibrary::DebugLogWithObjectContext(this, FString::Printf(TEXT("Attempting to Set Stamina Component")), EDebugType::DT_Log);
+	UE_LOG(LogStamina, Log, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "Attempting to Set Stamina Component"));
 	
 	if(IsValid(StaminaComponent))
 	{
-		UDebugFunctionLibrary::DebugLogWithObjectContext(this, FString::Printf(TEXT("Stamina Component Set: %s"), *StaminaComponent->GetName()), EDebugType::DT_Log);
+		UE_LOG(LogStamina, Log, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "Stamina Component Set"));
 		StaminaComponent->OnStaminaValueUpdated.AddUniqueDynamic(this, &UStaminaWidget::OnStaminaValueChanged);
 		StaminaComponent->OnMaxStaminaValueUpdated.AddUniqueDynamic(this, &UStaminaWidget::OnMaxStaminaValueChanged);
  

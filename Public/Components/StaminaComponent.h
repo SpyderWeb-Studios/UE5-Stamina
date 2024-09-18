@@ -13,6 +13,8 @@
 
 class UCharacterMovementComponent;
 
+DECLARE_LOG_CATEGORY_EXTERN(LogStamina, Log, All);
+
 /*
 * @brief The Stamina Component is used to manage the Stamina of a Character, and to allow the Character to perform actions based on their Stamina
 */
@@ -106,7 +108,7 @@ protected:
 
 	
 	UFUNCTION(BlueprintAuthorityOnly, BlueprintCallable, Category="Sprint|Base")
-	    void SetRegenVariables(const float& DecayRate, const float& DecayStep);
+	    void SetRegenVariables(const float& RegenRate, const float& RegenStep);
 	
 	/**
 	 * @brief Whether or not the Character is Consuming Stamina
@@ -137,6 +139,17 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Stamina|Base")
 	float StaminaRegenStep = 1;
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category="Stamina|Base")
+		bool CanRegenerateStamina() const;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category="Stamina|Base")
+		bool CanConsumeStamina() const;
+
+	UFUNCTION(BlueprintNativeEvent, Category="Stamina|Base")
+		void OnStaminaValueChanged();
+
+	UFUNCTION(BlueprintNativeEvent, Category="Stamina|Base")
+		void OnMaxStaminaValueChanged();
 private:
 	
 	FTimerDelegate StaminaRegenDelegate;
@@ -144,3 +157,6 @@ private:
 	FTimerHandle StaminaRegenHandle;
 	
 };
+
+
+

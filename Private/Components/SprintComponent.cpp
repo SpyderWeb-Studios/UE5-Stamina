@@ -2,7 +2,11 @@
 
 
 #include "Components/SprintComponent.h"
+
+
+#include "Macros.h"
 #include "Components/StaminaComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Interfaces/SprintComponentInterface.h"
 
 // Sets default values for this component's properties
@@ -47,14 +51,13 @@ void USprintComponent::StaminaEnabled(bool bArg)
 {
 	if(GetOwner()->HasAuthority())
 	{
-		const FString Message = "Stamina Enabled: " + FString::FromInt(bArg);
-		UDebugFunctionLibrary::DebugLogWithObjectContext(this, Message, EDebugType::DT_Log, 5.0f);
+		UE_LOG(LogStamina, Log, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "Stamina Enabled: [%d]"), bArg);
 
 		// Only do something if the stamina component reports that the stamina has ran out
 		// or that we can now sprint again
 		if(bSprintEnabled && !bArg)
 		{
-			UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Disabling Sprint");
+			UE_LOG(LogStamina, Log, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "Disabling Sprint"));
 			ToggleSprint(false);
 		}
 	}
@@ -70,13 +73,13 @@ void USprintComponent::BeginPlay()
 
 		if(GetOwner()->Implements<USprintComponentInterface>())
 		{
-			UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Owner Implements Sprint Component Interface", EDebugType::DT_Log, 5.0f);
+			UE_LOG(LogStamina, Log, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "Owner Implements Sprint Component Interface"));
 			StaminaComponent = ISprintComponentInterface::Execute_GetStaminaComponent(GetOwner());
 			CharacterMovementComponent = ISprintComponentInterface::Execute_GetCharacterMovementComponent(GetOwner());
 		}
 		else
 		{
-			UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Owner Does Not Implement Sprint Component Interface", EDebugType::DT_Log, 5.0f);
+			UE_LOG(LogStamina, Log, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "Owner Does Not Implements Sprint Component Interface"));
 			StaminaComponent = GetOwner()->FindComponentByClass<UStaminaComponent>();
 		}
 		
@@ -93,15 +96,12 @@ void USprintComponent::BeginPlay()
 		
 		if(CharacterMovementComponent.IsValid())
 		{
-			UDebugFunctionLibrary::DebugLogWithObjectContext(this, "Character Movement Component Found", EDebugType::DT_Log, 5.0f);
+			UE_LOG(LogStamina, Log, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "Character Movement Component Found"));
 		}
-
 		StaminaDecayDelegate.BindUObject(this, &USprintComponent::SprintStaminaDecay);
 
 		SetDecayVariables(StaminaDecayRate, StaminaDecayStep);
 		GetWorld()->GetTimerManager().PauseTimer(StaminaDecayHandle);
-
-		
 	}
 	
 }
@@ -131,7 +131,7 @@ void USprintComponent::SetDecayVariables(const float& DecayRate, const float& De
 	// Make sure we are on the server
 	if(!GetOwner()->HasAuthority())
 	{
-		UDebugFunctionLibrary::DebugLogWithObjectContext(this, "SetRegenVariables called on client");
+		UE_LOG(LogStamina, Error, TEXT("%s"), FORMAT_STRING_WITH_NETMODE(this, "SetRegenVariables called on client"));
 		return;
 	}
 	

@@ -11,7 +11,7 @@ public Stamina(ReadOnlyTargetRules Target) : base(Target)
 { 
 
 PrivateDependencyModuleNames.AddRange(new string[] {"Core", "CoreUObject", "Engine"});
-        PublicDependencyModuleNames.AddRange(new string[] { "Helper", "EnhancedInput", "UMG" });
+        PublicDependencyModuleNames.AddRange(new string[] { "StaminaHelper", "EnhancedInput", "UMG" });
 
     }
 
